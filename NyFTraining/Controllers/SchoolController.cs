@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NyFTraining.Controllers
 {
     [Route("api/schools")]
+    [ApiController]
     public class SchoolController : ControllerBase
     {
         private readonly ISchoolService _service;
@@ -34,39 +36,29 @@ namespace NyFTraining.Controllers
             return Ok(school);
         }
 
-        [HttpPost]//request body
-        public ActionResult Add(string name)
+        [HttpPost]
+        public ActionResult Add([FromBody][Required] string name)
         {
-            if(string.IsNullOrEmpty(name))
-            {
-                return BadRequest("Name is null or empty.");
-            }
-
             var school = _service.AddSchool(name);
 
-            return Created($"api/schools/{school.Id}", school); // find way that does not return object
+            return Created($"api/schools/{school.Id}", null);
         }
 
-        [HttpPut]//id -> route data, newName -> request body; find automatic way to validate (attribute validation)
-        public ActionResult Edit(int id, string newName)
+        [HttpPut]
+        public ActionResult Edit([FromBody] School sc)
         {
-            if (string.IsNullOrEmpty(newName))
-            {
-                return BadRequest("Name is null or empty.");
-            }
-
-            var school = _service.EditSchool(id, newName);
+            var school = _service.EditSchool(sc.Id, sc.Name);
 
             if (school == null)
             {
                 return NotFound();
             }
 
-            return Ok(school);
+            return Ok();
         }
 
-        [HttpDelete]//id -> route data
-        public ActionResult Delete(int id)
+        [HttpDelete]
+        public ActionResult Delete([FromBody][Required] int id)
         {
             var isDeleted = _service.DeleteSchool(id);
 
